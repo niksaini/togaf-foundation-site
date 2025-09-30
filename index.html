@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TOGAF 9.2 Foundation — Refresher + Mock Tests</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <meta name="description" content="Compact refresher of the TOGAF 9.2 Foundation plus 10 mock tests with feedback."/>
+</head>
+<body>
+  <header class="header">
+    <h1>TOGAF 9.2 Foundation</h1>
+    <p class="subtitle">Refresher + Mock Tests (free & offline)</p>
+    <nav class="tabs">
+      <button class="tab active" data-tab="refresher">Refresher</button>
+      <button class="tab" data-tab="tests">Mock Tests</button>
+      <button class="tab" data-tab="about">About</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="refresher" class="tab-content active">
+      <div id="refresher-sections" class="cards"></div>
+    </section>
+
+    <section id="tests" class="tab-content">
+      <div class="test-controls">
+        <label>Choose a mock test:</label>
+        <select id="test-select"></select>
+        <button id="start-btn">Start Test</button>
+      </div>
+
+      <div id="exam-info" class="exam-info">
+        <p><strong>Format:</strong> Multiple choice | <strong>Questions:</strong> up to 40 | <strong>Pass mark:</strong> 60% | <strong>Time limit:</strong> 60 minutes</p>
+      </div>
+
+      <div id="timer" class="timer hidden">Time: <span id="time-left">--:--</span></div>
+
+      <div id="test-area" class="hidden">
+        <div id="question-container"></div>
+        <div class="nav">
+          <button id="prev-btn">&larr; Prev</button>
+          <span id="q-progress"></span>
+          <button id="next-btn">Next &rarr;</button>
+        </div>
+        <button id="submit-btn" class="submit">Submit Test</button>
+      </div>
+
+      <div id="results" class="hidden"></div>
+    </section>
+
+    <section id="about" class="tab-content">
+      <h2>About this site</h2>
+      <p>This lightweight site provides a concise <em>refresher</em> of concepts commonly tested in the TOGAF&reg; Standard, Version 9.2 Foundation exam (Part 1), plus at least 10 seeded mock tests.</p>
+      <ul>
+        <li><strong>Offline-first:</strong> Works as plain static files; no build tools required.</li>
+        <li><strong>Exam-like:</strong> Multiple choice, 60-minute timer, 60% pass mark.</li>
+        <li><strong>Feedback:</strong> Post-submission review emphasizes incorrect answers with brief explanations.</li>
+      </ul>
+      <p><small>Disclaimer: This is <em>not</em> official Open Group content. Questions are study aids inspired by public resources; phrasing is original.</small></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <a href="sources.md" target="_blank">Sources &amp; further reading</a>
+    <span>&middot;</span>
+    <a href="README.md" target="_blank">README</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
