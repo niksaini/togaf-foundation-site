@@ -1,6 +1,7 @@
-// Refresher with clickable images (overlay) + Mock tests
+// Refresher with robust images (fallbacks + overlay) + Mock tests
 
-// ---------------- Refresher Data (with images) ----------------
+function imgCandidates(primary, fallbacks=[]) { return [primary, ...fallbacks].filter(Boolean); }
+
 const refresherSections = [
   { title: "Exam Snapshot & Strategy", tag: "Start Here", bullets: [
     "Audience: TOGAF® 9.2 Foundation (Part 1). Concept recognition over deep design.",
@@ -8,15 +9,24 @@ const refresherSections = [
     "Strategy: Memorize core anchors (ADM, DABB, Repository, Continuum, Principles).",
     "Eliminate distractors that contradict definitions (e.g., ABB vs SBB).",
     "Timeboxing: ~1–1.5 min per question; mark difficult ones; return later.",
-    "Keywords to watch: ‘primarily’, ‘best describes’, ‘objective of Phase X’, ‘holds’, ‘consists of’.",
-    "Artifacts (catalog/matrix/diagram) vs Deliverables (reviewed packages like Architecture Definition Document).",
+    "Keywords: ‘primarily’, ‘best describes’, ‘objective of Phase X’, ‘holds’, ‘consists of’.",
+    "Artifacts (catalog/matrix/diagram) vs Deliverables (Architecture Definition Document, Roadmap, IM Plan).",
     "When unsure, map to ADM: G=compliance; F=migration plan; A=SoAW; H=change mgmt."
   ]},
   { title: "ADM Overview (map)", tag: "ADM", bullets: [
     "Preliminary → A → B → C → D → E → F → G → H; central Requirements Management.",
     "Iteration: around cycle / between phases / within a phase; use partitions for scale.",
     "Aims: A Vision+SoAW; B Business; C IS (Data+App); D Tech; E Opportunities; F Migration; G Governance; H Change."
-  ], imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/13/TOGAF_ADM.svg", imageCredit: "Wikimedia Commons: TOGAF ADM.svg (license may apply)" },
+  ],
+    imageUrls: imgCandidates(
+      "https://upload.wikimedia.org/wikipedia/commons/1/13/TOGAF_ADM.svg",
+      [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/TOGAF%20ADM.svg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/TOGAF_ADM.svg/1024px-TOGAF_ADM.svg.png"
+      ]
+    ),
+    imageCredit: "Wikimedia Commons: TOGAF ADM (license may apply)"
+  },
   { title: "Preliminary Phase", tag: "ADM", bullets: [
     "Establish EA capability; define principles; select tools; set up Repository; tailor framework.",
     "Outputs: Principles, EA Charter, governance approach, initial capability target state.",
@@ -76,7 +86,16 @@ const refresherSections = [
     "Artifact: catalog/matrix/diagram (Application Portfolio, Technology Standards, Data Lifecycle).",
     "ABBs describe capabilities; SBBs describe implementations/products/configurations.",
     "Mnemonic: Artifacts live inside Deliverables; Artifacts describe Building Blocks."
-  ], imageUrl: "https://upload.wikimedia.org/wikipedia/commons/9/9d/TOGAF_-_Building_Blocks.jpg", imageCredit: "Wikimedia Commons: TOGAF - Building Blocks.jpg (license may apply)" },
+  ],
+    imageUrls: imgCandidates(
+      "https://upload.wikimedia.org/wikipedia/commons/9/9d/TOGAF_-_Building_Blocks.jpg",
+      [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/TOGAF%20-%20Building%20Blocks.jpg",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/TOGAF_-_Building_Blocks.jpg/1024px-TOGAF_-_Building_Blocks.jpg"
+      ]
+    ),
+    imageCredit: "Wikimedia Commons: TOGAF - Building Blocks (license may apply)"
+  },
   { title: "Content Metamodel — Motivation & Business", tag: "Metamodel", bullets: [
     "Motivation: drivers, goals, objectives, requirements, constraints, principles.",
     "Business: capabilities, value streams, services, processes, org/actors, roles.",
@@ -113,7 +132,16 @@ const refresherSections = [
     "Baseline vs Target: ‘carried over’, ‘eliminated’, ‘new’ building blocks.",
     "Decide ABB→SBB realization (build/buy/reuse).",
     "Feeds: work packages, transition architectures, risks/dependencies."
-  ], imageUrl: "https://upload.wikimedia.org/wikipedia/commons/1/1c/0017_-_GAP-Analyse.png", imageCredit: "Wikimedia Commons: GAP-Analyse.png (CC BY-SA)" },
+  ],
+    imageUrls: imgCandidates(
+      "https://upload.wikimedia.org/wikipedia/commons/1/1c/0017_-_GAP-Analyse.png",
+      [
+        "https://commons.wikimedia.org/wiki/Special:FilePath/0017%20-%20GAP-Analyse.png",
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/0017_-_GAP-Analyse.png/800px-0017_-_GAP-Analyse.png"
+      ]
+    ),
+    imageCredit: "Wikimedia Commons: GAP-Analyse (CC BY-SA)"
+  },
   { title: "Migration Planning & Roadmaps", tag: "Technique", bullets: [
     "Inputs: priorities, dependencies, readiness, constraints, benefits/risks.",
     "Outputs: IM Plan (F), refined Roadmap; balance quick wins vs foundations.",
@@ -151,7 +179,6 @@ const refresherSections = [
   ]}
 ];
 
-// ---------------- Minimal Question Bank (site remains exam-like) ----------------
 const BANK = [
   { id:"q001", topic:"ADM", stem:"Which phase produces the Statement of Architecture Work?", choices:[
     {text:"Preliminary",correct:false},{text:"Phase A: Architecture Vision",correct:true},{text:"Phase E",correct:false},{text:"Phase G",correct:false}
@@ -176,7 +203,6 @@ const BANK = [
   ], explanation:"Phase G = Implementation Governance."}
 ];
 
-// ---------------- Image Overlay Styles (injected) ----------------
 (function injectModalStyles(){
   const css = `
   .img-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 9999; }
@@ -190,7 +216,6 @@ const BANK = [
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 })();
 
-// ---------------- Modal Singleton ----------------
 const ImgModal = (function(){
   let overlay, content, img, closeBtn, caption;
   function ensure(){
@@ -238,13 +263,24 @@ const ImgModal = (function(){
   return { open };
 })();
 
-// ---------------- Mock Tests setup ----------------
+function attachImageFallback(imgEl) {
+  const listAttr = imgEl.getAttribute('data-src-list');
+  if (!listAttr) return;
+  let list;
+  try { list = JSON.parse(listAttr); } catch { list = [imgEl.src]; }
+  let ix = 0;
+  function tryNext() {
+    if (ix >= list.length) { imgEl.closest('figure')?.remove(); return; }
+    imgEl.src = list[ix++];
+  }
+  imgEl.addEventListener('error', tryNext);
+}
+
 const TEST_SEEDS = Array.from({length:10}, (_,i)=> i+1);
 function rng(seed) { return function () { let t = (seed += 0x6d2b79f5); t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 function sample(arr, k, r) { const a = arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a.slice(0,k); }
 const TESTS = TEST_SEEDS.map(seed => ({ id: seed, name: `Mock Test #${seed}`, questions: sample(BANK, Math.min(40, BANK.length), rng(seed)) }));
 
-// ---------------- Tab wiring (index.html already has .tab/.tab-content) ----------------
 const tabs = document.querySelectorAll('.tab');
 const tabContents = document.querySelectorAll('.tab-content');
 tabs.forEach(btn=>btn.addEventListener('click', ()=>{
@@ -254,7 +290,6 @@ tabs.forEach(btn=>btn.addEventListener('click', ()=>{
   document.getElementById(btn.dataset.tab).classList.add('active');
 }));
 
-// ---------------- Render refresher with clickable images ----------------
 const refresherWrap = document.getElementById('refresher-sections');
 if (refresherWrap) {
   refresherSections.forEach(s => {
@@ -263,10 +298,11 @@ if (refresherWrap) {
     const kicker = `<div class="kicker">${s.tag}</div>`;
     const title = `<h3>${s.title}</h3>`;
     let media = '';
-    if (s.imageUrl) {
-      const safeTitle = s.title.replace(/`/g,'\\`');
+    if (s.imageUrls && s.imageUrls.length) {
+      const listJson = JSON.stringify(s.imageUrls).replace(/"/g,'&quot;');
+      const safeTitle = s.title.replace(/`/g,'\`');
       media = `<figure style="margin:0 0 10px 0;">
-        <img class="refresher-img" src="${s.imageUrl}" alt="${safeTitle}" style="width:100%;border-radius:12px;border:1px solid #1e2a52;max-height:280px;object-fit:contain;background:#0b1020;" data-fullsrc="${s.imageUrl}" data-caption="${s.imageCredit||''}"/>
+        <img class="refresher-img" src="${s.imageUrls[0]}" data-src-list="${listJson}" alt="${safeTitle}" style="width:100%;border-radius:12px;border:1px solid #1e2a52;max-height:280px;object-fit:contain;background:#0b1020;" data-caption="${s.imageCredit||''}"/>
         <figcaption style="color:#aeb7d5;font-size:12px;margin-top:6px;">${s.imageCredit||''}</figcaption>
       </figure>`;
     }
@@ -277,17 +313,26 @@ if (refresherWrap) {
     refresherWrap.appendChild(card);
   });
 
-  // Delegate click on images to open modal
+  refresherWrap.querySelectorAll('img.refresher-img').forEach(img => {
+    attachImageFallback(img);
+  });
+
   refresherWrap.addEventListener('click', (e)=>{
     const img = e.target.closest('img.refresher-img');
     if (!img) return;
-    const full = img.getAttribute('data-fullsrc') || img.src;
+    const listAttr = img.getAttribute('data-src-list');
+    let full = img.src;
+    if (listAttr) {
+      try {
+        const list = JSON.parse(listAttr);
+        full = list[0] || img.src;
+      } catch {}
+    }
     const caption = img.getAttribute('data-caption') || '';
     ImgModal.open(full, img.alt, caption);
   });
 }
 
-// ---------------- Test UI ----------------
 const PASS_MARK = 0.60;
 const DURATION_MINUTES = 60;
 const selectEl = document.getElementById('test-select');
